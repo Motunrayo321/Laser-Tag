@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Shooting Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #1e1e1e;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+        }
+        .health-bar {
+            width: 100%;
+            height: 20px;
+            background-color: red;
+            border-radius: 5px;
+        }
+        .health-bar span {
+            display: block;
+            height: 100%;
+            background-color: green;
+            border-radius: 5px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .game-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #252525;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ESP32 IR Shooting Game</h1>
+
+        <h2>Player: <span id="playerName">Unknown</span></h2>
+        <h3>Team: <span id="playerTeam">N/A</span></h3>
+        <h3>Points: <span id="playerPoints">0</span></h3>
+
+        <div class="game-info">
+            <h3>Leading Team: <span id="leadingTeam">None</span></h3>
+            <h3>Players Registered: <span id="playersRegistered">0</span></h3>
+            <h3>Players Left: <span id="playersLeft">0</span></h3>
+        </div>
+
+        <h3>Health</h3>
+        <div class="health-bar">
+            <span id="playerHealth" style="width: 100%;"></span>
+        </div>
+    </div>
+
+    <script>
+        // Simulated data (replace this with ESP32 WebSocket or HTTP update logic)
+        function updateGameData(data) {
+            document.getElementById("playerName").textContent = data.name;
+            document.getElementById("playerTeam").textContent = data.team;
+            document.getElementById("playerPoints").textContent = data.points;
+            document.getElementById("leadingTeam").textContent = data.leadingTeam;
+            document.getElementById("playersRegistered").textContent = data.playersRegistered;
+            document.getElementById("playersLeft").textContent = data.playersLeft;
+
+            // Update health bar
+            let healthPercentage = (data.health / data.maxHealth) * 100;
+            document.getElementById("playerHealth").style.width = healthPercentage + "%";
+            document.getElementById("playerHealth").style.backgroundColor = healthPercentage > 50 ? "green" : "orange";
+            if (healthPercentage < 20) document.getElementById("playerHealth").style.backgroundColor = "red";
+        }
+
+        // Example: Simulating updates
+        setTimeout(() => {
+            updateGameData({
+                name: "Player1",
+                team: "Red",
+                points: 120,
+                health: 60,
+                maxHealth: 100,
+                leadingTeam: "Blue",
+                playersRegistered: 10,
+                playersLeft: 8
+            });
+        }, 2000);
+    </script>
+
+</body>
+</html>
