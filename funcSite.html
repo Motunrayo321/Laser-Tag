@@ -11,8 +11,9 @@
         .button { padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; cursor: pointer; }
         .button:hover { background-color: #218838; }
         label[for="team"] { display: block; margin-bottom: 8px; font-size: 18px; font-weight: bold; color: #ffffff; }
-        .team { margin: 20px 0; }
-        .team select {
+        .joinTimeLeft {color: red}
+        .teams { margin: 20px 0; }
+        .teams select {
             background-color: #333;
             color: white;
             border: 2px solid #28a745;
@@ -23,8 +24,8 @@
             cursor: pointer;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
-        .team select:hover { border-color: #218838; }
-        .team select:focus { outline: none; box-shadow: 0 0 5px #28a745; }
+        .teams select:hover { border-color: #218838; }
+        .teams select:focus { outline: none; box-shadow: 0 0 5px #28a745; }
         .stats { margin-top: 20px; text-align: left; display: inline-block; }
         .bar { width: 100px; height: 20px; background-color: red; }
     </style>
@@ -37,21 +38,24 @@
         <div>
             <input type="text" id="name" class="input-box" placeholder="Enter Your Name">
             <button class="button" onclick="registerPlayer()">Join Game</button>
+            <p>Time to join: <span id="joinTimeLeft">2:00</span></p>
+            
         </div>
 
-        <label for="team">Choose a Team:</label>
+        <label for="teams">Choose a Team:</label>
 
-        <div class="team">
-            <select name="teams" id="teams">
-                <option value="red" id="red">Red</option>
-                <option value="blue" id="blue">Blue</option>
+        <div class="teams">
+            <select name="teams" id="teams" onchange="pickTeam()">
+                <option value="none" id="none">None</option>
+                <option value="Red" id="Red">Red</option>
+                <option value="Blue" id="Blue">Blue</option>
               </select>
         </div>
         
 
         <div class="stats">
             <p>Player: <span id="playerName">Not Registered</span></p>
-            <p>Team: <span id="team">N/A</span></p>
+            <p>Team: <span id="playerTeam">N/A</span></p>
             <p>Score: <span id="score">0</span></p>
             <p>Health: <span id="health">100</span></p>
             <div class="bar" id="healthBar"></div>
@@ -72,7 +76,7 @@
                 let data = JSON.parse(event.data);
                 document.getElementById("score").innerText = data.score;
                 document.getElementById("healthBar").style.width = data.health + "px";
-                document.getElementById("team").innerText = data.team;
+                // document.getElementById("team").innerText = data.team;
                 document.getElementById("playersLeft").innerText = data.playersLeft;
                 document.getElementById("timeLeft").innerText = data.timeLeft;
                 document.getElementById("leadingTeam").innerText = data.leadingTeam;
@@ -87,23 +91,83 @@
             });
         }
 
-        let minutes = 10;
-        let seconds = 60;
+        function pickTeam() {
+          let team = document.getElementById("teams").value;
+          fetch("/register?team=" + team).then(response => response.text()).then(data => {
 
-        function duration() {
-          seconds--;
+            if (team != "none") {
+              document.getElementById("playerTeam").innerText = team;
+            }
 
-          if (minutes > 0) {
+            ws.send(JSON.stringify({ team: team }));
+          });
+        }
+
+        let minutes = 1;
+        let seconds = 10;
+        let counter = 19;
+
+        function joinTimer() {
+		  counter--;
+          
+          if (minutes >= 0) {
+          	seconds--;
             if (seconds == 0)  {
-              seconds = 60;
+              seconds = 9;
               minutes--;
             }
           }
+          if (counter == 0) {
+          minutes = 0;
+          seconds = 0;
+          clearInterval(joinInterval);
+          
+          document.getElementById("name").style.display = "none";
+          document.querySelector(".button").style.display = "none";
+          document.querySelector(".teams").style.display = "none";
+          document.querySelector('label[for="teams"]').style.display = "none";
+
+          gameInterval = setInterval(gameTimer, 1000);
+
+          /* var timeOut = setTimeout(function(){
+    document.getElementById("joinTimeLeft").innerText = "Joining closed";
+}, 1000);
+		  setTimeout(clearTimeout(timeOut), 5000);
+			   */
+          } 
+          
           console.log(seconds);
-          document.getElementById("timeLeft").innerHTML = `${minutes}:${seconds}`;
+          document.getElementById("joinTimeLeft").innerHTML = `${minutes}:${seconds} - ${counter}`;
+
         }
 
-        setInterval(duration, 1000);
+        joinInterval = setInterval(joinTimer, 1000);
+        
+        
+        let gameMinutes = 10;
+        let gameSeconds = 59;
+        let gameCounter = 6000;
+
+        function gameTimer() {
+		  gameCounter--;
+          
+          if (gameMinutes >= 0) {
+          	gameSeconds--;
+            if (gameSeconds == 0)  {
+              gameSeconds = 59;
+              gameMinutes--;
+            }
+          }
+          if (gameCounter == 0) {
+          gameMinutes = 0;
+          gameSeconds = 0;
+          clearInterval(gameInterval);
+          }
+          
+          document.getElementById("timeLeft").innerHTML = `${minutes}:${seconds} - ${gameCounter}`;
+          
+        }
+
 
         window.onload = connectWebSocket;
     </script>
