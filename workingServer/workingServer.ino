@@ -2,8 +2,17 @@
 #include <WebServer.h>
 
 // WiFi Credentials
-const char* ssid     = "UNILAG-DESIGN-STUDIO";
-const char* password = "Design@24.";
+// const char* ssid     = "UNILAG-DESIGN-STUDIO";
+// const char* password = "Design@24.";
+
+const char* ssid = "Redmi Note 12";
+const char* password = "wb845q4fmpura7x";
+
+// const char* ssid     = "Homie";
+// const char* password = "JustConnect";
+
+// const char* ssid     = "iPhone";
+// const char* password = "3902608018";
 
 // Web server on port 80
 WebServer server(80);

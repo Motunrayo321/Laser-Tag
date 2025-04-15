@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IR Shooting Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; }
+        .container { width: 80%; margin: auto; padding: 20px; }
+        .input-box { padding: 10px; margin: 10px; font-size: 16px; }
+        .button { padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        .button:hover { background-color: #218838; }
+        label[for="team"] { display: block; margin-bottom: 8px; font-size: 18px; font-weight: bold; color: #ffffff; }
+        .team { margin: 20px 0; }
+        .team select {
+            background-color: #333;
+            color: white;
+            border: 2px solid #28a745;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            appearance: none; /* Removes native dropdown arrow for consistency */
+            cursor: pointer;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .team select:hover { border-color: #218838; }
+        .team select:focus { outline: none; box-shadow: 0 0 5px #28a745; }
+        .stats { margin-top: 20px; text-align: left; display: inline-block; }
+        .bar { width: 100px; height: 20px; background-color: red; }
+    </style>
+    
+  </head>
+
+  <body>
+    <div class="container">
+        <h1>IR Shooting Game</h1>
+        <div>
+            <input type="text" id="name" class="input-box" placeholder="Enter Your Name">
+            <button class="button" onclick="registerPlayer()">Join Game</button>
+        </div>
+
+        <label for="team">Choose a Team:</label>
+
+        <div class="team">
+            <select name="teams" id="teams">
+                <option value="red" id="red">Red</option>
+                <option value="blue" id="blue">Blue</option>
+              </select>
+        </div>
+        
+
+        <div class="stats">
+            <p>Player: <span id="playerName">Not Registered</span></p>
+            <p>Team: <span id="team">N/A</span></p>
+            <p>Score: <span id="score">0</span></p>
+            <p>Health: <span id="health">100</span></p>
+            <div class="bar" id="healthBar"></div>
+        </div>
+        <div class="stats">
+            <p>Players Left: <span id="playersLeft">10</span></p>
+            <p>Time Left: <span id="timeLeft">10:00</span> sec</p>
+            <p>Leading Team: <span id="leadingTeam">N/A</span></p>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+
+        function connectWebSocket() {
+            ws = new WebSocket("ws://" + window.location.host + "/ws");
+            ws.onmessage = function(event) {
+                let data = JSON.parse(event.data);
+                document.getElementById("score").innerText = data.score;
+                document.getElementById("healthBar").style.width = data.health + "px";
+                document.getElementById("team").innerText = data.team;
+                document.getElementById("playersLeft").innerText = data.playersLeft;
+                document.getElementById("timeLeft").innerText = data.timeLeft;
+                document.getElementById("leadingTeam").innerText = data.leadingTeam;
+            };
+        }
+
+        function registerPlayer() {
+            let name = document.getElementById("name").value;
+            fetch("/register?name=" + name).then(response => response.text()).then(data => {
+                document.getElementById("playerName").innerText = name;
+                ws.send(JSON.stringify({ name: name }));
+            });
+        }
+
+        let minutes = 10;
+        let seconds = 60;
+
+        function duration() {
+          seconds--;
+
+          if (minutes > 0) {
+            if (seconds == 0)  {
+              seconds = 60;
+              minutes--;
+            }
+          }
+          console.log(seconds);
+          document.getElementById("timeLeft").innerHTML = `${minutes}:${seconds}`;
+        }
+
+        setInterval(duration, 1000);
+
+        window.onload = connectWebSocket;
+    </script>
+    
+  </body>
+</html>

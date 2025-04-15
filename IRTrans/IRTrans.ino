@@ -1,7 +1,7 @@
 #include <IRremote.h>
 
 // Specify the pin connected to the IR transmitter
-const int IR_TRANSMITTER_PIN = 3; // Change this to match your actual transmitter pin
+const int IR_TRANSMITTER_PIN = 13; // Change this to match your actual transmitter pin
 
 IRsend irsend(IR_TRANSMITTER_PIN);
 
